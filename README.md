@@ -1,6 +1,6 @@
 * [**HTML**](#html)
-* [**CSS**]()
-* [**JS**]()
+* [**CSS**](#css)
+* [**JS**](#js)
 
 \
 **Структура**
@@ -34,7 +34,6 @@ project/
   index.html
 ```
 
-\
 ### HTML
 
 *Базовые части разметки*
@@ -197,8 +196,7 @@ project/
 </html>
 ```
 
-\
-**CSS**
+### CSS
 
 *Правило `@import`*
 * Правило `@import` работает медленнее, чем тег `<link>`. В стилях `@import` не использован.
@@ -420,8 +418,7 @@ ul > li { ... }
 }
 ```
 
-\
-**JS**
+### JS
 
 ***Типы***
 
@@ -442,11 +439,27 @@ ul > li { ... }
 
 3.1. Для создания объекта используйте литеральную нотацию.
 ```js
+// плохо
+const item = new Object();
+
+// хорошо
 const item = {};
 ```
 
 3.2. Используйте вычисляемые имена свойств, когда создаёте объекты с динамическими именами свойств. Они позволяют вам определить все свойства объекта в одном месте.
 ```js
+function getKey(k) {
+  return `a key named ${k}`;
+}
+
+// плохо
+const obj = {
+  id: 5,
+  name: 'San Francisco',
+};
+obj[getKey('enabled')] = true;
+
+// хорошо
 const obj = {
   id: 5,
   name: 'San Francisco',
@@ -456,6 +469,16 @@ const obj = {
 
 3.3. Используйте сокращённую запись метода объекта.
 ```js
+// плохо
+const atom = {
+  value: 1,
+
+  addValue: function (value) {
+    return atom.value + value;
+  },
+};
+
+// хорошо
 const atom = {
   value: 1,
 
@@ -469,6 +492,12 @@ const atom = {
 ```js
 const lukeSkywalker = 'Luke Skywalker';
 
+// плохо
+const obj = {
+  lukeSkywalker: lukeSkywalker,
+};
+
+// хорошо
 const obj = {
   lukeSkywalker,
 };
@@ -479,6 +508,17 @@ const obj = {
 const anakinSkywalker = 'Anakin Skywalker';
 const lukeSkywalker = 'Luke Skywalker';
 
+// плохо
+const obj = {
+  episodeOne: 1,
+  twoJediWalkIntoACantina: 2,
+  lukeSkywalker,
+  episodeThree: 3,
+  mayTheFourth: 4,
+  anakinSkywalker,
+};
+
+// хорошо
 const obj = {
   lukeSkywalker,
   anakinSkywalker,
@@ -491,6 +531,14 @@ const obj = {
 
 3.6. Только недопустимые идентификаторы помещаются в кавычки. На наш взгляд, такой код легче читать. Это улучшает подсветку синтаксиса, а также облегчает оптимизацию для многих JS-движков.
 ```js
+// плохо
+const bad = {
+  'foo': 3,
+  'bar': 4,
+  'data-blah': 5,
+};
+
+// хорошо
 const good = {
   foo: 3,
   bar: 4,
@@ -500,12 +548,32 @@ const good = {
 
 3.7. Не вызывайте напрямую методы `Object.prototype`, такие как `hasOwnProperty`, `propertyIsEnumerable`, и `isPrototypeOf`. Эти методы могут быть переопределены в свойствах объекта, который мы проверяем `{ hasOwnProperty: false }`, или этот объект может быть `null` (`Object.create(null)`).
 ```js
+// плохо
+console.log(object.hasOwnProperty(key));
+
+// хорошо
+console.log(Object.prototype.hasOwnProperty.call(object, key));
+
+// отлично
 const has = Object.prototype.hasOwnProperty; // кэшируем запрос в рамках модуля
 console.log(has.call(object, key));
+/* или */
+import has from 'has'; // https://www.npmjs.com/package/has
+console.log(has(object, key));
 ```
 
 3.8. Используйте синтаксис расширения вместо `Object.assign` для поверхностного копирования объектов. Используйте параметр оставшихся свойств, чтобы получить новый объект с некоторыми опущенными свойствами.
 ```js
+// очень плохо
+const original = { a: 1, b: 2 };
+const copy = Object.assign(original, { c: 3 }); // эта переменная изменяет `original`
+delete copy.a; // если сделать так
+
+// плохо
+const original = { a: 1, b: 2 };
+const copy = Object.assign({}, original, { c: 3 }); // copy => { a: 1, b: 2, c: 3 }
+
+// хорошо
 const original = { a: 1, b: 2 };
 const copy = { ...original, c: 3 }; // copy => { a: 1, b: 2, c: 3 }
 
@@ -516,6 +584,10 @@ const { a, ...noA } = copy; // noA => { b: 2, c: 3 }
 
 4.1. Для создания массива используйте литеральную нотацию.
 ```js
+// плохо
+const items = new Array();
+
+// хорошо
 const items = [];
 ```
 
@@ -523,47 +595,92 @@ const items = [];
 ```js
 const someStack = [];
 
+// плохо
+someStack[someStack.length] = 'abracadabra';
+
+// хорошо
 someStack.push('abracadabra');
 ```
 
 4.3. Для копирования массивов используйте оператор расширения `...`.
 ```js
+// плохо
+const len = items.length;
+const itemsCopy = [];
+let i;
+
+for (i = 0; i < len; i += 1) {
+  itemsCopy[i] = items[i];
+}
+
+// хорошо
 const itemsCopy = [...items];
 ```
 
-4.4. Для преобразования итерируемого объекта в массив используйте оператор расширения `...` вместо `from()`.
+4.4. Для преобразования итерируемого объекта в массив используйте оператор расширения `...` вместо `Array.from()`.
 ```js
 const foo = document.querySelectorAll('.foo');
 
+// хорошо
+const nodes = Array.from(foo);
+
+// отлично
 const nodes = [...foo];
 ```
 
-4.5. Используйте `from()` для преобразования массивоподобного объекта в массив.
+4.5. Используйте `Array.from()` для преобразования массивоподобного объекта в массив.
 ```js
 const arrLike = { 0: 'foo', 1: 'bar', 2: 'baz', length: 3 };
 
+// плохо
+const arr = Array.prototype.slice.call(arrLike);
+
+// хорошо
 const arr = Array.from(arrLike);
 ```
 
-4.6. Используйте `from()` вместо оператора расширения `...` для маппинга итерируемых объектов, это позволяет избежать создания промежуточного массива.
+4.6. Используйте `Array.from()` вместо оператора расширения `...` для маппинга итерируемых объектов, это позволяет избежать создания промежуточного массива.
 ```js
+// плохо
+const baz = [...foo].map(bar);
+
+// хорошо
 const baz = Array.from(foo, bar);
 ```
 
 4.7. Используйте операторы `return` внутри функций обратного вызова в методах массива. Можно опустить `return`, когда тело функции состоит из одной инструкции, возвращающей выражение без побочных эффектов (8.2).
 ```js
+// хорошо
 [1, 2, 3].map((x) => {
   const y = x + 1;
   return x * y;
 });
 
+// хорошо
 [1, 2, 3].map((x) => x + 1);
 
+// плохо - нет возвращаемого значения, следовательно, `acc` становится `undefined` после первой итерации
+[[0, 1], [2, 3], [4, 5]].reduce((acc, item, index) => {
+  const flatten = acc.concat(item);
+});
+
+// хорошо
 [[0, 1], [2, 3], [4, 5]].reduce((acc, item, index) => {
   const flatten = acc.concat(item);
   return flatten;
 });
 
+// плохо
+inbox.filter((msg) => {
+  const { subject, author } = msg;
+  if (subject === 'Mockingbird') {
+    return author === 'Harper Lee';
+  } else {
+    return false;
+  }
+});
+
+// хорошо
 inbox.filter((msg) => {
   const { subject, author } = msg;
   if (subject === 'Mockingbird') {
@@ -576,6 +693,22 @@ inbox.filter((msg) => {
 
 4.8. Если массив располагается на нескольких строках, то используйте разрывы строк после открытия и перед закрытием скобок.
 ```js
+// плохо
+const arr = [
+  [0, 1], [2, 3], [4, 5],
+];
+
+const objectInArray = [{
+  id: 1,
+}, {
+  id: 2,
+}];
+
+const numberInArray = [
+  1, 2,
+];
+
+// хорошо
 const arr = [[0, 1], [2, 3], [4, 5]];
 
 const objectInArray = [
@@ -594,4 +727,90 @@ const numberInArray = [
 ```
 
 ***Деструктуризация***
+
+5.1. При обращении к нескольким свойствам объекта используйте деструктуризацию объекта. Деструктуризация сохраняет вас от создания временных переменных для этих свойств и от повторного доступа к объекту. Повторный доступ к объектам создаёт более повторяющийся код, требует большего чтения и создаёт больше возможностей для ошибок. Деструктуризация объектов также обеспечивает единое местоположение определения структуры объекта, которое используется в блоке, вместо того, чтобы требовать чтения всего блока для определения того, что используется.
+```js
+// плохо
+function getFullName(user) {
+  const firstName = user.firstName;
+  const lastName = user.lastName;
+
+  return `${firstName} ${lastName}`;
+}
+
+// хорошо
+function getFullName(user) {
+  const { firstName, lastName } = user;
+  return `${firstName} ${lastName}`;
+}
+
+// отлично
+function getFullName({ firstName, lastName }) {
+  return `${firstName} ${lastName}`;
+}
+```
+
+5.2. Используйте деструктуризацию массивов.
+```js
+const arr = [1, 2, 3, 4];
+
+// плохо
+const first = arr[0];
+const second = arr[1];
+
+// хорошо
+const [first, second] = arr;
+```
+
+5.3. Используйте деструктуризацию объекта для множества возвращаемых значений, но не делайте тоже самое с массивами.Вы сможете добавить новые свойства через некоторое время или изменить порядок без последствий.
+```js
+// плохо
+function processInput(input) {
+  // затем происходит чудо
+  return [left, right, top, bottom];
+}
+
+// при вызове нужно подумать о порядке возвращаемых данных
+const [left, __, top] = processInput(input);
+
+// хорошо
+function processInput(input) {
+  // затем происходит чудо
+  return { left, right, top, bottom };
+}
+
+// при вызове выбираем только необходимые данные
+const { left, top } = processInput(input);
+```
+
+***Строки***
+
+6.1. Используйте одинарные кавычки `''` для строк.
+```js
+// плохо
+const name = "Capt. Janeway";
+
+// плохо - литерал шаблонной строки должен содержать интерполяцию или переводы строк
+const name = `Capt. Janeway`;
+
+// хорошо
+const name = 'Capt. Janeway';
+```
+
+6.2. Строки, у которых в строчке содержится более 100 символов, не пишутся на нескольких строчках с использованием конкатенации. Работать с разбитыми строками неудобно и это затрудняет поиск по коду.
+```js
+// плохо
+const errorMessage = 'This is a super long error that was thrown because \
+of Batman. When you stop to think about how Batman had anything to do \
+with this, you would get nowhere \
+fast.';
+
+// плохо
+const errorMessage = 'This is a super long error that was thrown because ' +
+  'of Batman. When you stop to think about how Batman had anything to do ' +
+  'with this, you would get nowhere fast.';
+
+// хорошо
+const errorMessage = 'This is a super long error that was thrown because of Batman. When you stop to think about how Batman had anything to do with this, you would get nowhere fast.';
+```
 
